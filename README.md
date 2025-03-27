@@ -24,16 +24,20 @@ yarn add @convivainc/conviva-js-appanalytics
 
 ### 2. Initialization
 
-**Note**: It is recommended to initialize the tracker as early **as possible** during the DOM load sequence, such as in `App.js`.
-
+ - Import the required packages into your project:
 ```js
-import { convivaAppTracker } from '@convivainc/conviva-js-appanalytics';
-// ...
-    convivaAppTracker({
-        appId: 'YOUR_APP_NAME_AS_STRING',
-        convivaCustomerKey: 'CONVIVA_ACCOUNT_CUSTOMER_KEY',
-        appVersion: "1.1.0"
-    });
+ import { convivaAppTracker, setUserId, trackPageView } from '@convivainc/conviva-js-appanalytics';
+```
+
+- Initialize the Conviva JavaScript ECO SDK:
+
+**Note**: It is recommended to initialize the tracker as early **as possible** during the DOM load sequence, such as in `App.js`.
+```js
+convivaAppTracker({
+    appId: 'YOUR_APP_NAME_AS_STRING',
+    convivaCustomerKey: 'CONVIVA_ACCOUNT_CUSTOMER_KEY',
+    appVersion: "1.1.0"
+});
 ```
 **appId** - A string value that uniquely identifies your app across platforms. For example: `"WEB App"`, `"LGTV App"`.
 
@@ -45,7 +49,6 @@ import { convivaAppTracker } from '@convivainc/conviva-js-appanalytics';
 User ID is a unique string identifier to distinguish individual viewers. If using [Conviva Video Sensor](https://github.com/Conviva/conviva-js-coresdk), match it with the **Viewer ID**. 
 
 ```js
-import { setUserId } from '@convivainc/conviva-js-appanalytics';
 
 setUserId('replace_me_by_the_userId');
 ```
@@ -55,7 +58,6 @@ setUserId('replace_me_by_the_userId');
 By default, when `trackPageView()` is called, the *Page Title* is set using `document.title`. However, you can override this by passing a custom title in the `trackPageView()` API:
 
 ```js
-import { trackPageView } from '@convivainc/conviva-js-appanalytics';
 
 // Uses document.title as the Page Title
 trackPageView();
@@ -64,24 +66,7 @@ trackPageView();
 trackPageView({"title": "Custom Page Title"});
 ```
 
-### 5. Error Reporting 
-Error and exception auto-collection is enabled by default. Alternatively, you can manually report exceptions using the following API:
-
-```js
-import { trackError } from '@convivainc/conviva-js-appanalytics';
-
-try {
-    //...
-} catch (error) {
-    trackError({
-        message: 'Cannot get user object',
-        filename: 'shop.js',
-        error: error // Passing the caught error object.
-    });
-}
-
-```
-After steps 1–5, verify [auto-collected events](#auto-collected-events) in the [validation dashboard](https://pulse.conviva.com/app/appmanager/ecoIntegration/validation) . (_Conviva login required_)
+After steps 1–4, verify [auto-collected events](#auto-collected-events) in the [validation dashboard](https://pulse.conviva.com/app/appmanager/ecoIntegration/validation) . (_Conviva login required_)
 
 
 ## More Features
@@ -98,15 +83,15 @@ Use the **trackCustomEvent()** API to track all kinds of events. This API provid
 ```js
 import { trackCustomEvent } from '@convivainc/conviva-js-appanalytics';
 
-let custom_data = {
+let customData = {
                     "identifier1": "test",
                     "identifier2": 1,
                     "identifier3":true
                   };
 
 trackCustomEvent({
-  name: "custom_event_name",
-  data: custom_data
+  name: "Custom Event Name",
+  data: customData
 });
 ```
 </details>
@@ -120,9 +105,8 @@ Custom Tags are global tags applied to all events and persist throughout the app
 ```js
 import { setCustomTags } from '@convivainc/conviva-js-appanalytics';
 
-// Adds the custom tags
-let customTagsToSet = {"tagKey1": "tagValue1","tagKey2": 1,"tagKey3":true};
-setCustomTags(customTagsToSet);
+let customTagsData = { "tagKey1": "tagValue1", "tagKey2": 1, "tagKey3": true };
+setCustomTags({ name: "App Global Tag", data: customTagsData });
 
 ```
 
@@ -131,10 +115,32 @@ setCustomTags(customTagsToSet);
 import { unsetCustomTags } from '@convivainc/conviva-js-appanalytics';
 
 // Remove custom tags tagKey2 & tagKey3
-let customTagsToUnset = ['tagKey2', 'tagKey3'];
-unsetCustomTags(customTagsToUnset);
+let customTagsData = ["tagKey2", "tagKey3"];
+
+unsetCustomTags({ name: "App Global Tag", data: customTagData });
 ```
 
+</details>
+
+<details>
+    <summary><b>Error Reporting</b></summary>
+    
+Uncaught exceptions and unhandled rejections are automatically collected and enabled by default. To report caught exceptions or other errors, use the following API:
+
+```js
+import { trackError } from '@convivainc/conviva-js-appanalytics';
+
+try {
+    //...
+} catch (error) {
+    trackError({
+        message: 'Cannot get user object',
+        filename: 'shop.js',
+        error: error // Passing the caught error object.
+    });
+}
+
+```
 </details>
 
 <details>
@@ -340,7 +346,6 @@ Conviva automatically collects rich set of app performance metrics through app e
 Event | Occurrence |
 ------|------------|
 network_request | After receiving the network request response. [Refer limitations](#limitations). |
-page_ping | Max X and Y scroll positions difference comparing to the last event.|
 application_error | When an error occurrs in the application.|
 button_click | On the button click callback. [Refer limitations](#limitations). |
 link_click | On the link click callback. [Refer limitations](#limitations). |
@@ -357,7 +362,7 @@ To learn about the default metrics for analyzing the native and web applications
 ### Limitations
 
 <details>
-  <summary><b>button_click, link_click</b></summary>
+  <summary><b>Clicks</b></summary>
 
 The collection of all types of clicks is automatically supported, including those from standard HTML elements as well as elements created using React, Angular, and Vue frameworks. We also offer an experimental remote configuration specifically for click events, aiming to dynamically add support for non-standard or unsupported frameworks. For further assistance, please contact the Conviva support team. 
 **Note:** `preventDefault` and `stopPropagation` will prevent the auto-collection of button and link click events.
